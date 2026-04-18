@@ -1,0 +1,14 @@
+{
+  "name": "mmm-facetracking",
+  "version": "1.0.0",
+  "description": "MagicMirror module for webcam face tracking and facial-expression based mood estimation.",
+  "main": "MMM-FaceTracking.js",
+  "keywords": [
+    "magicmirror",
+    "magicmirror-module",
+    "face-tracking",
+    "emotion-detection",
+    "mood-tracking"
+  ],
+  "license": "MIT"
+}
