@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mood Dashboard</title>
+  <link rel="stylesheet" href="/MMM-FaceTracking/mood-dashboard.css">
+</head>
+<body>
+  <main class="mood-page">
+    <section class="mood-hero">
+      <div class="mood-hero__eyebrow">MMM-FaceTracking</div>
+      <h1 class="mood-hero__title">Mood by Hour</h1>
+      <p class="mood-hero__copy">
+        Hourly mood distribution based on the face-expression detections coming from your mirror.
+        The chart shows the share of each detected mood inside each hour bucket.
+      </p>
+    </section>
+
+    <div class="mood-panel">
+      <div class="mood-controls">
+        <label>
+          <div class="mood-panel__header">Source</div>
+          <select id="instance-select" class="mood-controls__select"></select>
+        </label>
+        <div id="last-updated" class="mood-controls__meta">Waiting for mood data</div>
+      </div>
+    </div>
+
+    <section class="mood-grid mood-grid--summary">
+      <article class="mood-tile">
+        <div class="mood-tile__label">Current hour</div>
+        <div id="summary-dominant" class="mood-tile__value">No data</div>
+        <div id="summary-dominant-meta" class="mood-tile__meta">No samples yet</div>
+      </article>
+      <article class="mood-tile">
+        <div class="mood-tile__label">Samples this hour</div>
+        <div id="summary-samples" class="mood-tile__value">0</div>
+        <div class="mood-tile__meta">Valid mood detections recorded in the current hour.</div>
+      </article>
+      <article class="mood-tile">
+        <div class="mood-tile__label">Tracked hours</div>
+        <div id="summary-hours" class="mood-tile__value">0</div>
+        <div id="summary-hours-meta" class="mood-tile__meta">Waiting for data</div>
+      </article>
+    </section>
+
+    <section class="mood-panel">
+      <div class="mood-panel__header">
+        <span>Hourly trend</span>
+        <span id="chart-subtitle" class="mood-controls__meta"></span>
+      </div>
+      <div id="chart-empty" class="mood-empty">No hourly mood samples have been recorded yet.</div>
+      <div id="chart" class="mood-chart" hidden></div>
+      <div id="legend" class="mood-legend"></div>
+    </section>
+
+    <section class="mood-panel">
+      <div class="mood-panel__header">
+        <span>Hour breakdown</span>
+        <span class="mood-controls__meta">Dominant mood and sample share for each bucket</span>
+      </div>
+      <div id="table-wrap"></div>
+    </section>
+  </main>
+
+  <script src="/MMM-FaceTracking/mood-dashboard.js"></script>
+</body>
+</html>

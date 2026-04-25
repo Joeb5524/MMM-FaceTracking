@@ -21,6 +21,7 @@ Module.register("MMM-FaceTracking", {
     closeFaceAreaThreshold: 0.2,
     noFaceResetMs: 3000,
     recentMoodLimit: 5,
+    hourlyHistoryHours: 168,
     showVideoPreview: false,
     previewWidth: 220,
     broadcastNotifications: true,
@@ -47,6 +48,7 @@ Module.register("MMM-FaceTracking", {
       surprised: "Surprised",
       uncertain: "Uncertain"
     };
+    this.instanceId = this.identifier || "MMM-FaceTracking";
 
     this.bootstrapStarted = false;
     this.modelsLoaded = false;
@@ -77,9 +79,17 @@ Module.register("MMM-FaceTracking", {
       },
       tracking: null,
       recentMoods: [],
+      hourlyMood: null,
+      hourlyMoodDataUrl: "/mood/data?instanceId=" + encodeURIComponent(this.instanceId),
+      dashboardUrl: "/mood?instanceId=" + encodeURIComponent(this.instanceId),
       lastSeenAt: null,
       lastUpdatedAt: null
     };
+
+    this.sendSocketNotification("CONFIG", {
+      instanceId: this.instanceId,
+      hourlyHistoryHours: this.config.hourlyHistoryHours
+    });
   },
 
   getScripts: function () {
@@ -94,6 +104,22 @@ Module.register("MMM-FaceTracking", {
     if (notification === "DOM_OBJECTS_CREATED") {
       this.bootstrap();
     }
+  },
+
+  socketNotificationReceived: function (notification, payload) {
+    if (notification !== "HOURLY_MOOD_SUMMARY" || !payload || payload.instanceId !== this.instanceId) {
+      return;
+    }
+
+    this.state.hourlyMood = payload.hourlyMood || null;
+    if (payload.hourlyMoodDataUrl) {
+      this.state.hourlyMoodDataUrl = payload.hourlyMoodDataUrl;
+    }
+    if (payload.dashboardUrl) {
+      this.state.dashboardUrl = payload.dashboardUrl;
+    }
+
+    this.broadcastState();
   },
 
   suspend: function () {
@@ -379,6 +405,7 @@ Module.register("MMM-FaceTracking", {
     this.state.lastUpdatedAt = now;
 
     this.recordMood(mood, now);
+    this.sendHourlyMoodSample(mood, now);
     this.setStatus("tracking", detections.length > 1 ? detections.length + " faces detected" : "Tracking active");
     this.broadcastState();
     this.requestDomUpdate();
@@ -500,8 +527,17 @@ Module.register("MMM-FaceTracking", {
     };
   },
 
+  isTrackableMoodSample: function (mood) {
+    return !!(
+      mood &&
+      mood.key &&
+      mood.key !== "uncertain" &&
+      mood.confidence >= this.config.expressionConfidenceThreshold
+    );
+  },
+
   recordMood: function (mood, timestamp) {
-    if (!mood || !mood.key || mood.key === "uncertain" || mood.confidence < this.config.expressionConfidenceThreshold) {
+    if (!this.isTrackableMoodSample(mood)) {
       return;
     }
 
@@ -519,6 +555,22 @@ Module.register("MMM-FaceTracking", {
       timestamp: timestamp
     });
     this.state.recentMoods = this.state.recentMoods.slice(0, this.config.recentMoodLimit);
+  },
+
+  sendHourlyMoodSample: function (mood, timestamp) {
+    if (!this.isTrackableMoodSample(mood)) {
+      return;
+    }
+
+    this.sendSocketNotification("MOOD_SAMPLE", {
+      instanceId: this.instanceId,
+      timestamp: timestamp,
+      mood: {
+        key: mood.key,
+        label: mood.label,
+        confidence: mood.confidence
+      }
+    });
   },
 
   describeHorizontalZone: function (value) {
@@ -592,10 +644,14 @@ Module.register("MMM-FaceTracking", {
 
     var now = Date.now();
     var payload = {
+      instanceId: this.instanceId,
       status: this.state.status,
       statusMessage: this.state.statusMessage,
       faceCount: this.state.faceCount,
       mood: this.state.mood,
+      hourlyMood: this.state.hourlyMood,
+      hourlyMoodDataUrl: this.state.hourlyMoodDataUrl,
+      dashboardUrl: this.state.dashboardUrl,
       tracking: this.state.tracking,
       recentMoods: this.state.recentMoods,
       lastSeenAt: this.state.lastSeenAt,
