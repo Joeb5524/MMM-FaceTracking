@@ -16,7 +16,7 @@ The expression estimate is a heuristic, not a reliable measure of a person's act
 - Face detection with `TinyFaceDetector`
 - Expression estimation with `faceExpressionNet`
 - Smoothed face position, movement, and distance hints
-- Recent mood history chips
+- Compact status card by default, with diagnostics available when enabled
 - Broadcast notification payloads for downstream automations
 - Persisted hourly mood buckets for dashboards and charts
 
@@ -70,6 +70,7 @@ Add this to the `modules` array in `config/config.js`:
 | `recentMoodLimit` | `5` | Number of recent mood changes shown |
 | `hourlyHistoryHours` | `168` | Number of hourly buckets to keep for `/mood` and `/mood/data` |
 | `showVideoPreview` | `false` | Shows the live camera preview inside the module |
+| `showDiagnostics` | `false` | Reveals face counts, movement hints, and recent mood chips in the module UI |
 | `previewWidth` | `220` | Preview width in pixels |
 | `broadcastNotifications` | `true` | Emit MagicMirror notifications |
 | `notificationName` | `"MOOD_GUARD_UPDATE"` | Notification topic name |

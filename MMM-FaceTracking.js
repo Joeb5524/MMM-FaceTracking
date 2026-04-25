@@ -23,6 +23,7 @@ Module.register("MMM-FaceTracking", {
     recentMoodLimit: 5,
     hourlyHistoryHours: 168,
     showVideoPreview: false,
+    showDiagnostics: false,
     previewWidth: 220,
     broadcastNotifications: true,
     notificationName: "MOOD_GUARD_UPDATE"
@@ -750,36 +751,42 @@ Module.register("MMM-FaceTracking", {
 
     wrapper.appendChild(moodCard);
 
-    var stats = document.createElement("div");
-    stats.className = "mmm-facetracking__grid";
-    var statNodes = {
-      faces: this.createStat("Faces"),
-      horizontal: this.createStat("X"),
-      vertical: this.createStat("Y"),
-      distance: this.createStat("Distance"),
-      movement: this.createStat("Movement"),
-      seen: this.createStat("Seen")
-    };
-    stats.appendChild(statNodes.faces.item);
-    stats.appendChild(statNodes.horizontal.item);
-    stats.appendChild(statNodes.vertical.item);
-    stats.appendChild(statNodes.distance.item);
-    stats.appendChild(statNodes.movement.item);
-    stats.appendChild(statNodes.seen.item);
-    wrapper.appendChild(stats);
+    var statNodes = null;
+    var history = null;
+    var chips = null;
 
-    var history = document.createElement("div");
-    history.className = "mmm-facetracking__history";
+    if (this.config.showDiagnostics) {
+      var stats = document.createElement("div");
+      stats.className = "mmm-facetracking__grid";
+      statNodes = {
+        faces: this.createStat("Faces"),
+        horizontal: this.createStat("X"),
+        vertical: this.createStat("Y"),
+        distance: this.createStat("Distance"),
+        movement: this.createStat("Movement"),
+        seen: this.createStat("Seen")
+      };
+      stats.appendChild(statNodes.faces.item);
+      stats.appendChild(statNodes.horizontal.item);
+      stats.appendChild(statNodes.vertical.item);
+      stats.appendChild(statNodes.distance.item);
+      stats.appendChild(statNodes.movement.item);
+      stats.appendChild(statNodes.seen.item);
+      wrapper.appendChild(stats);
 
-    var historyLabel = document.createElement("div");
-    historyLabel.className = "mmm-facetracking__label";
-    historyLabel.innerText = "Recent mood changes";
-    history.appendChild(historyLabel);
+      history = document.createElement("div");
+      history.className = "mmm-facetracking__history";
 
-    var chips = document.createElement("div");
-    chips.className = "mmm-facetracking__chips";
-    history.appendChild(chips);
-    wrapper.appendChild(history);
+      var historyLabel = document.createElement("div");
+      historyLabel.className = "mmm-facetracking__label";
+      historyLabel.innerText = "Recent mood changes";
+      history.appendChild(historyLabel);
+
+      chips = document.createElement("div");
+      chips.className = "mmm-facetracking__chips";
+      history.appendChild(chips);
+      wrapper.appendChild(history);
+    }
 
     this.dom = wrapper;
     this.domNodes = {
@@ -822,24 +829,28 @@ Module.register("MMM-FaceTracking", {
     this.domNodes.confidence.innerText = "Confidence " + this.percent(this.state.mood.confidence);
     this.domNodes.meterFill.style.width = Math.round((this.state.mood.confidence || 0) * 100) + "%";
 
-    this.domNodes.stats.faces.value.innerText = String(this.state.faceCount);
-    this.domNodes.stats.horizontal.value.innerText = this.state.tracking ? this.state.tracking.horizontalZone : "--";
-    this.domNodes.stats.vertical.value.innerText = this.state.tracking ? this.state.tracking.verticalZone : "--";
-    this.domNodes.stats.distance.value.innerText = this.state.tracking ? this.state.tracking.distance : "--";
-    this.domNodes.stats.movement.value.innerText = this.state.tracking ? this.state.tracking.movement : "--";
-    this.domNodes.stats.seen.value.innerText = this.state.lastSeenAt ? this.relativeTime(this.state.lastSeenAt) : "--";
-
-    this.domNodes.history.style.display = this.state.recentMoods.length ? "" : "none";
-    while (this.domNodes.chips.firstChild) {
-      this.domNodes.chips.removeChild(this.domNodes.chips.firstChild);
+    if (this.domNodes.stats) {
+      this.domNodes.stats.faces.value.innerText = String(this.state.faceCount);
+      this.domNodes.stats.horizontal.value.innerText = this.state.tracking ? this.state.tracking.horizontalZone : "--";
+      this.domNodes.stats.vertical.value.innerText = this.state.tracking ? this.state.tracking.verticalZone : "--";
+      this.domNodes.stats.distance.value.innerText = this.state.tracking ? this.state.tracking.distance : "--";
+      this.domNodes.stats.movement.value.innerText = this.state.tracking ? this.state.tracking.movement : "--";
+      this.domNodes.stats.seen.value.innerText = this.state.lastSeenAt ? this.relativeTime(this.state.lastSeenAt) : "--";
     }
 
-    this.state.recentMoods.forEach(function (entry) {
-      var chip = document.createElement("span");
-      chip.className = "mmm-facetracking__chip";
-      chip.innerText = entry.label;
-      this.domNodes.chips.appendChild(chip);
-    }, this);
+    if (this.domNodes.history && this.domNodes.chips) {
+      this.domNodes.history.style.display = this.state.recentMoods.length ? "" : "none";
+      while (this.domNodes.chips.firstChild) {
+        this.domNodes.chips.removeChild(this.domNodes.chips.firstChild);
+      }
+
+      this.state.recentMoods.forEach(function (entry) {
+        var chip = document.createElement("span");
+        chip.className = "mmm-facetracking__chip";
+        chip.innerText = entry.label;
+        this.domNodes.chips.appendChild(chip);
+      }, this);
+    }
   },
 
   createStat: function (label) {
