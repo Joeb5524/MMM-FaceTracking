@@ -23,6 +23,7 @@ Module.register("MMM-FaceTracking", {
     recentMoodLimit: 5,
     hourlyHistoryHours: 168,
     showVideoPreview: false,
+    showMoodCard: false,
     showDiagnostics: false,
     previewWidth: 220,
     broadcastNotifications: true,
@@ -157,7 +158,7 @@ Module.register("MMM-FaceTracking", {
       this.setStatus("loading", "Opening camera");
       await this.startCamera();
       this.startDetectionLoop();
-      this.setStatus("tracking", "Camera active");
+      this.setStatus("tracking", "Tracking active");
     } catch (error) {
       this.setError(error);
     }
@@ -366,7 +367,7 @@ Module.register("MMM-FaceTracking", {
 
     try {
       await this.startCamera();
-      this.setStatus("tracking", "Camera active");
+      this.setStatus("tracking", "Tracking active");
     } catch (error) {
       this.setError(error);
     } finally {
@@ -430,7 +431,7 @@ Module.register("MMM-FaceTracking", {
       this.state.tracking = null;
     }
 
-    this.setStatus("searching", "Camera active, looking for a face");
+    this.setStatus("searching", "Looking for face");
     this.broadcastState();
     this.requestDomUpdate();
   },
@@ -727,29 +728,35 @@ Module.register("MMM-FaceTracking", {
       wrapper.appendChild(preview);
     }
 
-    var moodCard = document.createElement("div");
-    moodCard.className = "mmm-facetracking__card";
+    var moodValue = null;
+    var confidence = null;
+    var fill = null;
 
-    var moodTitle = document.createElement("div");
-    moodTitle.className = "mmm-facetracking__label";
-    moodTitle.innerText = "Estimated mood";
-    moodCard.appendChild(moodTitle);
+    if (this.config.showMoodCard) {
+      var moodCard = document.createElement("div");
+      moodCard.className = "mmm-facetracking__card";
 
-    var moodValue = document.createElement("div");
-    moodValue.className = "mmm-facetracking__mood";
-    moodCard.appendChild(moodValue);
+      var moodTitle = document.createElement("div");
+      moodTitle.className = "mmm-facetracking__label";
+      moodTitle.innerText = "Estimated mood";
+      moodCard.appendChild(moodTitle);
 
-    var confidence = document.createElement("div");
-    confidence.className = "mmm-facetracking__confidence";
-    moodCard.appendChild(confidence);
+      moodValue = document.createElement("div");
+      moodValue.className = "mmm-facetracking__mood";
+      moodCard.appendChild(moodValue);
 
-    var meter = document.createElement("div");
-    meter.className = "mmm-facetracking__meter";
-    var fill = document.createElement("span");
-    meter.appendChild(fill);
-    moodCard.appendChild(meter);
+      confidence = document.createElement("div");
+      confidence.className = "mmm-facetracking__confidence";
+      moodCard.appendChild(confidence);
 
-    wrapper.appendChild(moodCard);
+      var meter = document.createElement("div");
+      meter.className = "mmm-facetracking__meter";
+      fill = document.createElement("span");
+      meter.appendChild(fill);
+      moodCard.appendChild(meter);
+
+      wrapper.appendChild(moodCard);
+    }
 
     var statNodes = null;
     var history = null;
@@ -825,9 +832,11 @@ Module.register("MMM-FaceTracking", {
       }
     }
 
-    this.domNodes.moodValue.innerText = this.state.mood.label;
-    this.domNodes.confidence.innerText = "Confidence " + this.percent(this.state.mood.confidence);
-    this.domNodes.meterFill.style.width = Math.round((this.state.mood.confidence || 0) * 100) + "%";
+    if (this.domNodes.moodValue && this.domNodes.confidence && this.domNodes.meterFill) {
+      this.domNodes.moodValue.innerText = this.state.mood.label;
+      this.domNodes.confidence.innerText = "Confidence " + this.percent(this.state.mood.confidence);
+      this.domNodes.meterFill.style.width = Math.round((this.state.mood.confidence || 0) * 100) + "%";
+    }
 
     if (this.domNodes.stats) {
       this.domNodes.stats.faces.value.innerText = String(this.state.faceCount);

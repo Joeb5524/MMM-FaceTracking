@@ -16,7 +16,7 @@ The expression estimate is a heuristic, not a reliable measure of a person's act
 - Face detection with `TinyFaceDetector`
 - Expression estimation with `faceExpressionNet`
 - Smoothed face position, movement, and distance hints
-- Compact status card by default, with diagnostics available when enabled
+- Status-only module UI by default, with optional preview, mood card, and diagnostics
 - Broadcast notification payloads for downstream automations
 - Persisted hourly mood buckets for dashboards and charts
 
@@ -41,6 +41,7 @@ Add this to the `modules` array in `config/config.js`:
   position: "top_right",
   config: {
     showVideoPreview: false,
+    showMoodCard: false,
     updateInterval: 500,
     broadcastNotifications: true,
     hourlyHistoryHours: 168
@@ -70,6 +71,7 @@ Add this to the `modules` array in `config/config.js`:
 | `recentMoodLimit` | `5` | Number of recent mood changes shown |
 | `hourlyHistoryHours` | `168` | Number of hourly buckets to keep for `/mood` and `/mood/data` |
 | `showVideoPreview` | `false` | Shows the live camera preview inside the module |
+| `showMoodCard` | `false` | Shows the on-module mood summary card |
 | `showDiagnostics` | `false` | Reveals face counts, movement hints, and recent mood chips in the module UI |
 | `previewWidth` | `220` | Preview width in pixels |
 | `broadcastNotifications` | `true` | Emit MagicMirror notifications |
@@ -174,5 +176,6 @@ When `broadcastNotifications` is enabled, the module sends `notificationName` wi
 
 - By default, the face models are loaded from a pinned jsDelivr URL. If you want local/offline hosting, copy the model files into the module and point `modelBaseUrl` at the local route served by MagicMirror.
 - The module needs camera access in the MagicMirror browser/Electron session.
+- The default on-screen UI only shows the live status line such as `Tracking active` or `Looking for face`. Detailed mood data remains available in `/mood` and notification payloads.
 - Hourly mood history is persisted to `data/mood-history.json` inside the module directory.
 - Facial-expression classifiers are noisy. Treat the output as a soft signal for ambience or automation, not as a definitive reading of mood.
