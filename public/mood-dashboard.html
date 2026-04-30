@@ -8,24 +8,20 @@
 </head>
 <body>
   <main class="mood-page">
-    <section class="mood-hero">
-      <div class="mood-hero__eyebrow">MMM-FaceTracking</div>
-      <h1 class="mood-hero__title">Mood by Hour</h1>
-      <p class="mood-hero__copy">
-        Hourly mood distribution based on the face-expression detections coming from your mirror.
-        The chart shows the share of each detected mood inside each hour bucket.
-      </p>
-    </section>
-
-    <div class="mood-panel">
-      <div class="mood-controls">
-        <label>
-          <div class="mood-panel__header">Source</div>
-          <select id="instance-select" class="mood-controls__select"></select>
-        </label>
+    <header class="mood-hero">
+      <div class="mood-hero__meta">
+        <span class="mood-eyebrow">MMM-FaceTracking</span>
+        <div>
+          <h1 class="mood-hero__title">Mood dashboard</h1>
+          <p class="mood-hero__copy">Hourly face-expression samples from the mirror.</p>
+        </div>
+      </div>
+      <div class="mood-source">
+        <label class="mood-source__label" for="instance-select">Source</label>
+        <select id="instance-select" class="mood-controls__select"></select>
         <div id="last-updated" class="mood-controls__meta">Waiting for mood data</div>
       </div>
-    </div>
+    </header>
 
     <section class="mood-grid mood-grid--summary">
       <article class="mood-tile">
@@ -47,7 +43,7 @@
 
     <section class="mood-panel">
       <div class="mood-panel__header">
-        <span>Hourly trend</span>
+        <h2>Hourly trend</h2>
         <span id="chart-subtitle" class="mood-controls__meta"></span>
       </div>
       <div id="chart-empty" class="mood-empty">No hourly mood samples have been recorded yet.</div>
@@ -57,7 +53,7 @@
 
     <section class="mood-panel">
       <div class="mood-panel__header">
-        <span>Hour breakdown</span>
+        <h2>Hour breakdown</h2>
         <span class="mood-controls__meta">Dominant mood and sample share for each bucket</span>
       </div>
       <div id="table-wrap"></div>
